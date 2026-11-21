@@ -1,0 +1,7 @@
+{
+    "language": "scala",
+    "version": "3.3.9",
+    "aliases": [
+        "sc"
+    ]
+}

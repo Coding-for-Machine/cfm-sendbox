@@ -1,0 +1,17 @@
+site_name: cfm-sendbox
+nav:
+    - Home: index.md
+    - Configuration: configuration.md
+    - API: api-v2.md
+    - Go API: api-go.md
+    - Languages: languages.md
+
+theme:
+    name: readthedocs
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - json
+
+markdown_extensions:
+    - admonition

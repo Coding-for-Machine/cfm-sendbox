@@ -1,0 +1,5 @@
+{
+    "language": "elixir",
+    "version": "1.20.5",
+    "aliases": ["elixir", "exs"]
+}

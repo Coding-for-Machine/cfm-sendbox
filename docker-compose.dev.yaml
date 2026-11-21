@@ -1,0 +1,26 @@
+services:
+    api:
+        platform: linux/amd64
+        build:
+            context: .
+            dockerfile: docker/api/Dockerfile
+        container_name: sendbox_api
+        privileged: true
+        restart: always
+        ports:
+            - 2000:2000
+        volumes:
+            - ./data/cfm/packages:/cfm/packages
+        tmpfs:
+            - /tmp:exec
+        environment:
+            - CFM_REPO_URL=http://repo:8000/index
+
+    repo: # Local testing of packages
+        build:
+            context: .
+            dockerfile: repo/Dockerfile
+        container_name: sendbox_repo
+        command: ['--no-build'] # Don't build anything
+        volumes:
+            - .:/cfm

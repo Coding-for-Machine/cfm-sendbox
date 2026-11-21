@@ -1,0 +1,10 @@
+{
+    "language": "node",
+    "version": "24.22.3",
+    "provides": [
+        {
+            "language": "javascript",
+            "aliases": ["node-javascript", "node-js", "javascript", "js"]
+        }
+    ]
+}

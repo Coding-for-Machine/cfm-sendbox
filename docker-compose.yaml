@@ -1,0 +1,19 @@
+services:
+    api:
+        platform: linux/amd64
+        build:
+            context: .
+            dockerfile: docker/api/Dockerfile
+        container_name: sendbox_api
+        restart: always
+        privileged: true
+        ports:
+            - 2000:2000
+        volumes:
+            - ./data/cfm/packages:/cfm/packages
+        tmpfs:
+            - /tmp:exec
+        environment:
+            - CFM_REPO_URL=${CFM_REPO_URL:-}
+        extra_hosts:
+            - host.docker.internal:host-gateway
