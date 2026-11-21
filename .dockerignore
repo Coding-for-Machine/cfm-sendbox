@@ -1,0 +1,5 @@
+.git
+data
+packages/*/*/*.pkg.tar.gz
+bin
+*.md

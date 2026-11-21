@@ -1,0 +1,40 @@
+name: Publish Repo image
+on:
+    push:
+        branches:
+            - main
+            - master
+            - v3
+        paths:
+            - repo/**
+            - cmd/sendbox-repo/**
+
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    packages: write
+
+jobs:
+    push_to_registry:
+        runs-on: ubuntu-latest
+        name: Build and Push Docker image to Github Packages
+        steps:
+            - name: Check out repo
+              uses: actions/checkout@v3
+            - name: Login to ghcr.io
+              uses: docker/login-action@v2
+              with:
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+                  registry: ghcr.io
+
+            - name: Build and push repo
+              uses: docker/build-push-action@v4
+              with:
+                  context: .
+                  file: repo/Dockerfile
+                  pull: true
+                  push: true
+                  tags: |
+                      ghcr.io/coding-for-machine/cfm-sendbox-repo-builder
