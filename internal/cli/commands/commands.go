@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	neturl "net/url"
 	"os"
 	"strings"
 
@@ -28,7 +29,10 @@ type Env struct {
 
 	// Color enables ANSI colors on Out; StatusTTY controls the status lines
 	// of interactive mode (which are only shown on a terminal).
-	Color     bool
+	Color bool
+
+	// APIKey overrides $CFM_API_KEY.
+	APIKey    string
 	StatusTTY bool
 
 	// Signals delivers OS signals to forward in interactive mode. When nil the
@@ -48,6 +52,28 @@ func NewEnv() Env {
 		StatusTTY: term.IsTTY(os.Stderr),
 		Getenv:    os.Getenv,
 	}
+}
+
+// newClient creates an API client carrying the API key, if any.
+func (e Env) newClient(url string) *client.Client {
+	key := e.APIKey
+	if key == "" {
+		key = e.getenv("CFM_API_KEY")
+	}
+	return client.New(url).WithKey(key)
+}
+
+// wsURL adds the API key to a WebSocket URL (headers cannot be set by every
+// WebSocket client, so the server also accepts the api_key query parameter).
+func (e Env) wsURL(u string) string {
+	key := e.APIKey
+	if key == "" {
+		key = e.getenv("CFM_API_KEY")
+	}
+	if key == "" {
+		return u
+	}
+	return u + "?api_key=" + neturl.QueryEscape(key)
 }
 
 func (e Env) paint() term.Painter { return term.Painter{On: e.Color} }
@@ -76,6 +102,7 @@ Commands:
 
 Global options:
   -u, --cfm-url URL   API URL (default $CFM_URL or ` + DefaultURL + `)
+  -k, --api-key KEY      API key (default $CFM_API_KEY)
   -h, --help             Show help
 `
 
@@ -132,6 +159,16 @@ loop:
 			}
 			url = args[i+1]
 			i += 2
+		case a == "-k" || a == "--api-key":
+			if i+1 >= len(args) {
+				fmt.Fprintf(env.Err, "flag needs an argument: %s\n", a)
+				return 2
+			}
+			env.APIKey = args[i+1]
+			i += 2
+		case strings.HasPrefix(a, "--api-key="):
+			env.APIKey = strings.TrimPrefix(a, "--api-key=")
+			i++
 		case strings.HasPrefix(a, "--cfm-url="):
 			url = strings.TrimPrefix(a, "--cfm-url=")
 			i++
@@ -203,7 +240,7 @@ func runRuntimes(args []string, env Env, url string) int {
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
-	rts, err := client.New(url).Runtimes()
+	rts, err := env.newClient(url).Runtimes()
 	if err != nil {
 		fmt.Fprintln(env.Err, err)
 		return 1

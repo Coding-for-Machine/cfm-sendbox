@@ -394,3 +394,34 @@ func TestParseInterleaved(t *testing.T) {
 		}
 	}
 }
+
+func TestAPIKey(t *testing.T) {
+	f := &fakeAPI{wsInit: make(chan map[string]any, 1)}
+	inner := f.handler()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer s3cret" {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"message":"Invalid or missing API key"}`))
+			return
+		}
+		inner.ServeHTTP(w, r)
+	}))
+	t.Cleanup(srv.Close)
+
+	if code, _, errOut := run(t, "", "-u", srv.URL, "runtimes"); code == 0 || !strings.Contains(errOut, "API key") {
+		t.Fatalf("expected an auth error, got code=%d err=%q", code, errOut)
+	}
+	if code, out, _ := run(t, "", "-u", srv.URL, "-k", "s3cret", "runtimes"); code != 0 || out == "" {
+		t.Fatalf("flag key should work, code=%d out=%q", code, out)
+	}
+	var o, e bytes.Buffer
+	env := Env{Out: &o, Err: &e, Getenv: func(k string) string {
+		if k == "CFM_API_KEY" {
+			return "s3cret"
+		}
+		return ""
+	}}
+	if code := Run([]string{"-u", srv.URL, "runtimes"}, env); code != 0 {
+		t.Fatalf("env key should work, code=%d err=%q", code, e.String())
+	}
+}

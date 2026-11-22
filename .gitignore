@@ -7,3 +7,4 @@ bin/
 packages/**/*.pkg.tar.gz
 repo/*.pkg.tar.gz
 repo/index
+.env

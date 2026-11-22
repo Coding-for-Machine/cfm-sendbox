@@ -200,3 +200,30 @@ CFM_LIMIT_OVERRIDES={"c++":{"max_process_count":128}}
 ```
 
 This will give `c++` a max_process_count of 128 regardless of the configuration.
+
+## API keys
+
+```yaml
+key: CFM_API_KEYS
+default: (empty - authentication disabled)
+```
+
+Comma separated list of accepted API keys. When set, every `/api/v2/*` request needs one of them
+(`/` and `/healthz` stay open). The key is read from, in this order:
+
+- `Authorization: Bearer <key>`
+- `X-API-Key: <key>`
+- `?api_key=<key>` query parameter (for WebSocket clients that cannot set headers)
+
+```sh
+# server
+CFM_API_KEYS="key1,key2" docker compose -f docker-compose.yaml up -d
+# curl
+curl -H "Authorization: Bearer key1" localhost:2000/api/v2/runtimes
+# CLI
+export CFM_API_KEY=key1          # or: ./cfm -k key1 runtimes
+./cfm run python t.py
+```
+
+Generate a key with `openssl rand -hex 32`. Rotate keys by listing the old and the new one, then removing the old one.
+Use HTTPS (reverse proxy) when the API is reachable from the internet.

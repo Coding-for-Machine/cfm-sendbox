@@ -39,7 +39,7 @@ func ppmanChange(args []string, env Env, url string, install bool) int {
 	}
 
 	p := env.paint()
-	c := client.New(url)
+	c := env.newClient(url)
 	failed := false
 	for _, pkg := range pkgs {
 		ref := splitPackage(pkg)
@@ -76,7 +76,7 @@ func ppmanList(args []string, env Env, url string) int {
 	if err := fs.Parse(args); err != nil {
 		return parseCode(err)
 	}
-	pkgs, err := client.New(url).Packages()
+	pkgs, err := env.newClient(url).Packages()
 	if err != nil {
 		fmt.Fprintln(env.Err, err)
 		return 1
@@ -245,7 +245,7 @@ func ppmanSpec(args []string, env Env, url string) int {
 		fmt.Fprintln(env.Err, err)
 		return 1
 	}
-	c := client.New(url)
+	c := env.newClient(url)
 	all, err := c.Packages()
 	if err != nil {
 		fmt.Fprintln(env.Err, err)

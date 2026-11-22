@@ -14,12 +14,16 @@ import (
 type Client struct {
 	Base string
 	HTTP *http.Client
+	Key  string // optional API key, sent as a Bearer token
 }
 
 // New creates a client for the given base URL (e.g. http://127.0.0.1:2000).
 func New(base string) *Client {
 	return &Client{Base: strings.TrimRight(base, "/"), HTTP: &http.Client{}}
 }
+
+// WithKey sets the API key and returns the client.
+func (c *Client) WithKey(key string) *Client { c.Key = key; return c }
 
 // APIError is a non-2xx answer from the server.
 type APIError struct {
@@ -44,6 +48,9 @@ func (c *Client) Do(method, path string, body, out any) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if c.Key != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Key)
+	}
 
 	resp, err := c.HTTP.Do(req)
 	if err != nil {

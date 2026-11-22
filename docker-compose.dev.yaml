@@ -13,6 +13,9 @@ services:
             - ./data/cfm/packages:/cfm/packages
         tmpfs:
             - /tmp:exec
+        env_file:
+            - path: .env
+              required: false
         environment:
             - CFM_REPO_URL=http://repo:8000/index
 

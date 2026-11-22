@@ -13,7 +13,8 @@ services:
             - ./data/cfm/packages:/cfm/packages
         tmpfs:
             - /tmp:exec
-        environment:
-            - CFM_REPO_URL=${CFM_REPO_URL:-}
+        env_file:
+            - path: .env # optional, see .env.example
+              required: false
         extra_hosts:
             - host.docker.internal:host-gateway

@@ -171,7 +171,7 @@ func runBatch(env Env, url string, req client.ExecuteRequest, readStdin bool) in
 		req.Stdin = string(data)
 	}
 
-	res, err := client.New(url).Execute(req)
+	res, err := env.newClient(url).Execute(req)
 	if err != nil {
 		fmt.Fprintln(env.Err, err)
 		return 1
@@ -208,7 +208,7 @@ func runInteractive(env Env, url string, req client.ExecuteRequest, status bool)
 	}
 	p := term.Painter{On: env.Color}
 
-	conn, err := ws.Dial(context.Background(), strings.TrimRight(url, "/")+"/api/v2/connect")
+	conn, err := ws.Dial(context.Background(), env.wsURL(strings.TrimRight(url, "/")+"/api/v2/connect"))
 	if err != nil {
 		fmt.Fprintln(env.Err, err)
 		return 1

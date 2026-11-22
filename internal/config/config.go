@@ -55,7 +55,9 @@ type Config struct {
 	RunMemoryLimit     int
 	RepoURL            string
 	RepoURLs           []string
-	MaxConcurrentJobs  int
+	// APIKeys is the set of accepted API keys; empty disables authentication.
+	APIKeys           []string
+	MaxConcurrentJobs int
 	// LimitOverrides maps language -> option name -> value.
 	LimitOverrides map[string]map[string]int
 }
@@ -164,6 +166,8 @@ func Load() (*Config, error) {
 		c.RepoURL = DefaultRepoURL
 	}
 	c.RepoURLs = splitList(c.RepoURL)
+
+	c.APIKeys = splitList(envString("api_keys", ""))
 
 	c.LimitOverrides = map[string]map[string]int{}
 	if raw, ok := lookup("limit_overrides"); ok {

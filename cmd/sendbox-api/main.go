@@ -67,6 +67,10 @@ func run() error {
 		return c.JSON(fiber.Map{"message": "cfm-sendbox v" + globals.Version})
 	})
 	app.Get("/healthz", func(c fiber.Ctx) error { return c.SendString("ok") })
+	if len(cfg.APIKeys) > 0 {
+		slog.Info("API key authentication enabled", "keys", len(cfg.APIKeys))
+	}
+	app.Use(api.KeyAuth(cfg.APIKeys, "/", "/healthz"))
 	api.New(reg, pm, job.NewRunner(cfg)).Register(app)
 	app.Use(func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Not Found"})
