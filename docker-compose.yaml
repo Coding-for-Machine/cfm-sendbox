@@ -1,3 +1,7 @@
+# cfm-sendbox (Piston fork). Joylashuvi: cfm-sendbox papkasidagi docker-compose.yml
+# Kalit: shu papkadagi .env ichida CFM_API_KEYS=...  (piston.env.example'ga qarang)
+# Qo'llash:  docker compose up -d --build --force-recreate
+
 services:
     api:
         platform: linux/amd64
@@ -7,14 +11,38 @@ services:
         container_name: sendbox_api
         restart: always
         privileged: true
+        mem_limit: 2g
+        cpus: 2.0
+
+        # ---- A) Hozirgi holat (siz tanlagan): host'da ochiq port ----
         ports:
             - 2000:2000
+
+        # ---- B) Xavfsizroq (tavsiya): faqat localhost + shared tarmoq ----
+        # A ni o'chirib, shuni yoqsangiz, Caddyfile'da "B" bloki va shared tarmoq kerak:
+        # ports:
+        #     - "127.0.0.1:2000:2000"
+        # networks:
+        #     shared:
+        #         aliases:
+        #             - piston
+
         volumes:
             - ./data/cfm/packages:/cfm/packages
         tmpfs:
             - /tmp:exec
         env_file:
-            - path: .env # optional, see .env.example
-              required: false
+            - path: .env
+              required: true   # .env yo'q bo'lsa Piston kalitsiz ko'tarilmasin
         extra_hosts:
             - host.docker.internal:host-gateway
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
+
+# B variant uchun yoqing:
+# networks:
+#     shared:
+#         external: true
