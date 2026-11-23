@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-
-mv $1 $1.go
-#filename=$1.go
-filename=*.go
+# $1 is the main file name (already compiled into ./out)
 shift
-GOCACHE=$PWD go run $filename "$@"
+./out "$@"
