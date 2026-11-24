@@ -1,0 +1,7 @@
+export PATH=$PWD/go/bin:$PATH
+export GOPATH=$PWD/gopath
+export GOTOOLCHAIN=local
+export GOTELEMETRY=off
+export CGO_ENABLED=0
+export GOFLAGS=
+export CFM_GO_WARM_CACHE=$PWD/warm-cache

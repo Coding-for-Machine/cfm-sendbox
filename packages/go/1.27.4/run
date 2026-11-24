@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# $1 is the main file name (already compiled into ./out)
+shift
+./out "$@"

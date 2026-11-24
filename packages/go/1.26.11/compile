@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Compiles the submitted files into ./out. Files without a .go extension are
+# renamed (the run script still receives the original main file name).
+export GOCACHE=$PWD/.gocache
+mkdir -p "$GOCACHE"
+if [ -d "$CFM_GO_WARM_CACHE" ]; then
+    cp -r "$CFM_GO_WARM_CACHE"/. "$GOCACHE"/
+fi
+
+for f in "$@"; do
+    case "$f" in
+        *.go) ;;
+        *) mv "$f" "$f.go" ;;
+    esac
+done
+
+go build -o out *.go

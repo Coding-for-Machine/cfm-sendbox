@@ -85,6 +85,8 @@ func run() error {
 		DisableStartupMessage: true,
 		GracefulContext:       ctx,
 		ShutdownTimeout:       shutdownTimeout,
+		OnShutdownSuccess:     func() { slog.Info("server stopped") },
+		OnShutdownError:       func(err error) { slog.Error("shutdown failed", "error", err) },
 	})
 	if err != nil {
 		return fmt.Errorf("server: %w", err)
