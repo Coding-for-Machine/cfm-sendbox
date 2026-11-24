@@ -73,13 +73,19 @@ jobs:
         needs: build-pkg
         steps:
             - name: 'Download all release assets'
-              run: curl -s https://api.github.com/repos/Coding-for-Machine/cfm-sendbox/releases/latest | jq '.assets[].browser_download_url' -r | xargs -L 1 curl -sLO
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  # The pkgs release is addressed by its tag (not "latest"); gh pages through all assets.
+                  gh release download pkgs --repo "${{ github.repository }}" --pattern '*.pkg.tar.gz'
+                  ls -la
             - name: 'Generate index file'
               run: |
-                  echo "" > index
-                  BASEURL=https://github.com/Coding-for-Machine/cfm-sendbox/releases/download/pkgs/
+                  : > index
+                  BASEURL=https://github.com/${{ github.repository }}/releases/download/pkgs/
                   for pkg in *.pkg.tar.gz
                   do
+                    [ -e "$pkg" ] || continue
                     PKGFILE=$(basename $pkg)
                     PKGFILENAME=$(echo $PKGFILE | sed 's/\.pkg\.tar\.gz//g')
 
@@ -89,6 +95,7 @@ jobs:
                     echo "$PKGNAME,$PKGVERSION,$PKGCHECKSUM,$BASEURL$PKGFILE" >> index
                     echo "Adding package $PKGNAME-$PKGVERSION"
                   done
+                  cat index
             - name: Upload index
               uses: svenstaro/upload-release-action@v2
               with:
